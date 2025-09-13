@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة القفز - سايبربانك</title>
+    <style>
+        /* التنسيقات العامة */
+        :root {
+            font-size: 16px; /* حجم الخط الأساسي */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex; /* استخدام Flexbox لتوسيط المحتوى */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* شاشة اللعبة الرئيسية والقوائم */
+        .game-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw; /* استخدام vw لملء العرض */
+            height: 100vh; /* استخدام vh لملء الارتفاع */
+            background: url('assets/images/Main.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            animation: fadeIn 1s ease;
+            transition: opacity 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .main-menu-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2vh; /* استخدام vh للمسافات بين الأزرار */
+            padding: 20px;
+            max-width: 90%;
+            width: 500px;
+        }
+
+        .main-menu-btn {
+            padding: 2vh 5vw; /* استخدام وحدات نسبية للحشو */
+            background: #1a0624;
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            color: #fff;
+            font-size: clamp(1rem, 2.5vw, 1.5rem); /* استخدام clamp للتحكم في حجم الخط */
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+            transition: 0.3s;
+            text-align: center;
+            text-shadow: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-menu-btn:hover {
+            background: #2a0a34;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            transform: scale(1.05);
+            color: #00ffff;
+        }
+
+        #startBtn {
+            background: #004488;
+            border-color: #00ffff;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+        }
+
+        #startBtn:hover {
+            background: #0066AA;
+        }
+
+        #startBtn:disabled {
+            background: #444;
+            border-color: #666;
+            cursor: not-allowed;
+            color: #999;
+        }
+
+        /* شاشات الإعدادات */
+        .settings-screen {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-column {
+            flex: 1;
+            min-width: 280px;
+            background: rgba(26, 6, 36, 0.6);
+            padding: 4vh 4vw;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+            border: 1px solid #ff00ff;
+            margin: 2vw;
+            text-align: center;
+            transition: transform 0.3s;
+            width: 90vw;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .settings-column h3 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 25px;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+        }
+
+        .settings-column label {
+            display: block;
+            margin-top: 15px;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: #e0e0e0;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .settings-column input[type="text"],
+        .settings-column input[type="range"] {
+            width: 100%;
+            margin-top: 8px;
+            background: #0a0a0a;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            color: #fff;
+            padding: 10px;
+            box-shadow: inset 0 0 5px #00ffff;
+        }
+
+        /* تنسيقات شريط التقدم */
+        .settings-column input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #00ffff;
+            outline: none;
+            border-radius: 3px;
+            cursor: pointer;
+            box-shadow: 0 0 5px #00ffff;
+            transition: all 0.2s ease;
+        }
+
+        .settings-column input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ff00ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: all 0.2s ease;
+        }
+
+        .settings-column input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ff00ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: all 0.2s ease;
+        }
+
+        .settings-column input[type="range"]:hover::-webkit-slider-thumb {
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        .settings-column input[type="range"]:hover::-moz-range-thumb {
+            background: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+
+        .settings-column input[type="file"] {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            color: #00ffff;
+        }
+
+        .save-btn, .back-btn, .reset-btn {
+            margin-top: 25px;
+            padding: 1.5vh 3vw;
+            background: #1a0624;
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: 0.3s;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        .save-btn:hover, .back-btn:hover, .reset-btn:hover {
+            background: #2a0a34;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ffff;
+            color: #00ffff;
+        }
+        
+        .settings-column .back-btn {
+            margin-top: 25px;
+        }
+
+        /* شاشة اللعب والـ HUD */
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background: url('assets/images/BackGround.jpg');
+            background-size: cover;
+            background-position: bottom;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #gameHud {
+            position: absolute;
+            top: 2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: clamp(1rem, 2vw, 2rem);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 1.5vh 3vw;
+            z-index: 15;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            color: #fff;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .hud-item .icon {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            margin-right: 8px;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        /* شاشة نهاية اللعبة */
+        #gameOverScreen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: url('assets/images/GameOver.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 5vh 8vw;
+            border-radius: 20px;
+            border: 2px solid #ff1a1a;
+            text-align: center;
+            z-index: 20;
+            box-shadow: 0 0 30px #ff1a1a, 0 0 60px #8b0000;
+            max-width: 90%;
+        }
+
+        #gameOverScreen h2 {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            color: #ff4d4d;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #ff4d4d;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #gameOverScreen p {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            margin-top: 10px;
+            color: #e0e0e0;
+            text-shadow: 0 0 5px #e0e0e0;
+        }
+
+        #gameOverScreen button {
+            margin-top: 25px;
+            padding: 1.5vh 3vw;
+            background: #1a0624;
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff00ff;
+            transition: 0.3s;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        #gameOverScreen button:hover {
+            background: #2a0a34;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ffff;
+            color: #00ffff;
+        }
+
+        /* لوحة الصدارة */
+        #leaderboardScreen .settings-column {
+            max-height: 80vh; /* تحديد ارتفاع أقصى للوحة الصدارة */
+        }
+
+        #leaderboardTable {
+            font-size: clamp(0.8rem, 2vw, 1.1rem);
+        }
+
+        /* العناصر المخفية */
+        .hidden {
+            display: none !important;
+        }
+        .sound-controls {
+            display: none;
+        }
+
+        /* Media Queries للشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .settings-column {
+                padding: 3vh;
+                margin: 20px 0;
+            }
+
+            .main-menu-btn {
+                width: 100%;
+                font-size: 1.2rem;
+            }
+
+            #startBtn {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mainMenuScreen" class="game-screen">
+        <div class="main-menu-content">
+            <button class="main-menu-btn" onclick="showScreen('playerSettingsScreen')">⚙️ إعدادات اللاعب</button>
+            <button class="main-menu-btn" onclick="showScreen('redObstacleSettingsScreen')">🧱 إعدادات الحواجز الحمراء</button>
+            <button class="main-menu-btn" onclick="showScreen('bulletSettingsScreen')">🔫 إعدادات الطلقات</button>
+            <button class="main-menu-btn" onclick="showScreen('greenObstacleSettingsScreen')">✨ إعدادات الحواجز الخضراء</button>
+            <button class="main-menu-btn" onclick="showScreen('soundSettingsScreen')">⚙️ إعدادات الصوت</button>
+            <button class="main-menu-btn" onclick="showLeaderboard()">🏆 لوحة الصدارة</button>
+            <button id="resetBtn" class="main-menu-btn reset-btn">🔄 إعادة ضبط الإعدادات الافتراضية</button>
+            <button id="startBtn" class="main-menu-btn" disabled>🚀 ابدأ اللعب (جاري تحميل الصور...)</button>
+        </div>
+    </div>
+
+    <div id="playerSettingsScreen" class="game-screen hidden">
+        <div class="settings-column">
+            <h3>⚙️ إعدادات اللاعب</h3>
+            <label>اسم اللاعب</label>
+            <input type="text" id="playerName" placeholder="ادخل اسمك" />
+            <label>صورة اللاعب</label>
+            <input type="file" id="playerImageInput" accept="image/gif, image/jpeg, image/png" />
+            <label>سرعة اللاعب</label>
+            <input type="range" id="playerSpeed" min="2" max="15" step="1" value="5" />
+            <label>عدد القفزات</label>
+            <input type="range" id="maxJumps" min="1" max="5" step="1" value="2" />
+            <label>قوة القفز</label>
+            <input type="range" id="jumpPower" min="10" max="40" step="1" value="20" />
+            <label>الجاذبية</label>
+            <input type="range" id="gravity" min="0.2" max="2" step="0.1" value="1" />
+            <label>عدد المحاولات (Lives)</label>
+            <input type="range" id="lives" min="1" max="10" step="1" value="3" />
+            <button class="back-btn" onclick="showScreen('mainMenuScreen')">عودة</button>
+        </div>
+    </div>
+
+    <div id="redObstacleSettingsScreen" class="game-screen hidden">
+        <div class="settings-column">
+            <h3>🧱 إعدادات الحواجز الحمراء</h3>
+            <label>صورة الحاجز الأحمر</label>
+            <input type="file" id="redObstacleImageInput" accept="image/gif, image/jpeg, image/png" />
+            <label>سرعة الحواجز</label>
+            <input type="range" id="obstacleSpeed" min="2" max="15" step="1" value="5" />
+            <label>دوران الحواجز</label>
+            <input type="range" id="rotationSpeed" min="0.01" max="0.2" step="0.01" value="0.05" />
+            <label>ارتداد الحواجز</label>
+            <input type="range" id="obstacleBounce" min="5" max="25" step="1" value="10" />
+            <label>عدد الحواجز</label>
+            <input type="range" id="maxObstacles" min="1" max="10" step="1" value="3" />
+            <button class="back-btn" onclick="showScreen('mainMenuScreen')">عودة</button>
+        </div>
+    </div>
+
+    <div id="bulletSettingsScreen" class="game-screen hidden">
+        <div class="settings-column">
+            <h3>🔫 إعدادات الطلقات</h3>
+            <label>صورة الطلقة</label>
+            <input type="file" id="bulletImageInput" accept="image/*" />
+            <label>سرعة الطلقة</label>
+            <input type="range" id="bulletSpeed" min="5" max="20" step="1" value="10" />
+            <label>عدد الطلقات (Ammo)</label>
+            <input type="range" id="maxAmmo" min="10" max="100" step="1" value="50" />
+            <button class="back-btn" onclick="showScreen('mainMenuScreen')">عودة</button>
+        </div>
+    </div>
+
+    <div id="greenObstacleSettingsScreen" class="game-screen hidden">
+        <div class="settings-column">
+            <h3>✨ إعدادات الحواجز الخضراء</h3>
+            <label>صورة الحاجز الأخضر</label>
+            <input type="file" id="greenObstacleImageInput" accept="image/gif, image/jpeg, image/png" />
+            <label>احتمالية ظهور الحاجز</label>
+            <input type="range" id="greenObstacleChance" min="0.01" max="0.5" step="0.01" value="0.15" />
+            <label>عدد الطلقات المكتسبة</label>
+            <input type="range" id="greenObstacleAmmo" min="1" max="50" step="1" value="20" />
+            <button class="back-btn" onclick="showScreen('mainMenuScreen')">عودة</button>
+        </div>
+    </div>
+
+    <div id="soundSettingsScreen" class="game-screen hidden">
+        <div class="settings-column">
+            <h3>🔊 إعدادات الصوت</h3>
+            <label>مستوى موسيقى الخلفية</label>
+            <input type="range" id="musicVolume" min="0" max="100" step="1" value="100" />
+            <label>مستوى المؤثرات الصوتية</label>
+            <input type="range" id="sfxVolume" min="0" max="100" step="1" value="100" />
+            <button class="back-btn" onclick="showScreen('mainMenuScreen')">عودة</button>
+        </div>
+    </div>
+
+    <div id="leaderboardScreen" class="game-screen hidden">
+        <div class="settings-column" style="text-align: right; overflow-y: auto;">
+            <h3>🏆 لوحة الصدارة 🏆</h3>
+            <table id="leaderboardTable" style="width:100%; text-align:right; color:#fff; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #00ffff; font-size: 18px;">
+                        <th style="padding: 10px;">اللاعب</th>
+                        <th style="padding: 10px;">النقاط</th>
+                        <th style="padding: 10px;">الوقت</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    </tbody>
+            </table>
+            <button class="back-btn" onclick="showScreen('mainMenuScreen')">عودة</button>
+        </div>
+    </div>
+
+    <div class="sound-controls">
+        <button id="musicToggle" class="sound-button">🎵</button>
+        <button id="sfxToggle" class="sound-button">🔊</button>
+    </div>
+
+    <canvas id="gameCanvas" class="hidden"></canvas>
+    <div id="gameHud" class="hidden">
+        <div class="hud-item">
+            <span class="icon">🌟</span>
+            <span id="scoreDisplay">0</span>
+        </div>
+        <div class="hud-item">
+            <span class="icon">❤️</span>
+            <span id="livesDisplay">0</span>
+        </div>
+        <div class="hud-item">
+            <span class="icon">⏱️</span>
+            <span id="timeDisplay">0s</span>
+        </div>
+        <div class="hud-item">
+            <span class="icon">🔫</span>
+            <span id="ammoDisplay">0</span>
+        </div>
+    </div>
+
+    <div id="gameOverScreen" class="hidden">
+        <h2>💀 انتهت اللعبة 💀</h2>
+        <p id="playerNameDisplay"></p>
+        <p id="finalScore">النقاط: 0</p>
+        <p id="finalTime">الوقت: 0s</p>
+        <button onclick="location.reload()">🔄 العب تاني</button>
+    </div>
+
+    <script src="assets/script/libgif.js"></script>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const screens = document.querySelectorAll('.game-screen');
+        const buttons = document.querySelectorAll('button');
+        const startBtn = document.getElementById("startBtn");
+
+        let gameRunning = false;
+        let gameOver = false;
+        let score = 0;
+        let lives = 3;
+        let startTime = 0;
+        let elapsedTime = 0;
+        let imagesLoaded = 0;
+        const totalImages = 4;
+
+        const player = {
+            x: 100,
+            y: 0,
+            width: 50,
+            height: 50,
+            color: "cyan",
+            speed: 5,
+            dy: 0,
+            gravity: 1,
+            jumpPower: 20,
+            jumps: 0,
+            maxJumps: 2,
+            image: null,
+            isGif: false
+        };
+
+        let playerName = "لاعب";
+        const bullets = [];
+        const obstacles = [];
+        let redObstacleImage = null;
+        let greenObstacleImage = null;
+        let rotationSpeed = 0.05;
+        let obstacleBounce = 10;
+        let maxObstacles = 3;
+        let greenObstacleChance = 0.15;
+        let greenObstacleAmmo = 20;
+
+        let bulletImage = null;
+        let bulletSpeed = 10;
+        let ammo = 50;
+
+        const particles = [];
+
+        let isMusicOn = true;
+        let isSfxOn = true;
+
+        let keys = {};
+        let mouseDown = false;
+
+        // ملفات الصوت
+        const jumpSound = new Audio("assets/sounds/jump.mp3");
+        const shootSound = new Audio("assets/sounds/shoot.mp3");
+        const explodeSound = new Audio("assets/sounds/explosion.mp3");
+        const greenObstacleSound = new Audio("assets/sounds/success.mp3");
+        const gameOverSound = new Audio("assets/sounds/gameover.mp3");
+        const backgroundMusic = new Audio("assets/sounds/background.mp3");
+        backgroundMusic.loop = true;
+        const hoverSound = new Audio("assets/sounds/hover.mp3");
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (gameRunning) {
+                player.x = 100;
+                player.y = canvas.height * 0.8 - player.height;
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        document.addEventListener("keydown", (e) => { keys[e.key] = true; });
+        document.addEventListener("keyup", (e) => { keys[e.key] = false; });
+
+        canvas.addEventListener("mousedown", (e) => {
+            mouseDown = true;
+            shootBullet(e.clientX, e.clientY);
+        });
+        canvas.addEventListener("mouseup", () => { mouseDown = false; });
+        canvas.addEventListener("mousemove", (e) => {
+            if (mouseDown && gameRunning) {
+                shootBullet(e.clientX, e.clientY);
+            }
+        });
+
+        // تشغيل صوت التمرير عند التفاعل مع الأزرار
+        buttons.forEach(button => {
+            button.addEventListener("mouseenter", () => {
+                if (isSfxOn) {
+                    hoverSound.currentTime = 0;
+                    hoverSound.play().catch(e => console.error("Error playing hover sound:", e));
+                }
+            });
+        });
+
+        // دالة لتبديل الشاشات
+        function showScreen(screenId) {
+            screens.forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function loadSettings() {
+            playerName = localStorage.getItem("playerName") || "لاعب";
+            document.getElementById("playerName").value = playerName;
+
+            player.speed = parseFloat(localStorage.getItem("playerSpeed")) || 5;
+            document.getElementById("playerSpeed").value = player.speed;
+
+            player.maxJumps = parseInt(localStorage.getItem("maxJumps")) || 2;
+            document.getElementById("maxJumps").value = player.maxJumps;
+
+            player.jumpPower = parseFloat(localStorage.getItem("jumpPower")) || 20;
+            document.getElementById("jumpPower").value = player.jumpPower;
+
+            player.gravity = parseFloat(localStorage.getItem("gravity")) || 1;
+            document.getElementById("gravity").value = player.gravity;
+
+            rotationSpeed = parseFloat(localStorage.getItem("rotationSpeed")) || 0.05;
+            document.getElementById("rotationSpeed").value = rotationSpeed;
+
+            obstacleBounce = parseFloat(localStorage.getItem("obstacleBounce")) || 10;
+            document.getElementById("obstacleBounce").value = obstacleBounce;
+
+            maxObstacles = parseInt(localStorage.getItem("maxObstacles")) || 3;
+            document.getElementById("maxObstacles").value = maxObstacles;
+
+            lives = parseInt(localStorage.getItem("lives")) || 3;
+            document.getElementById("lives").value = lives;
+
+            greenObstacleChance = parseFloat(localStorage.getItem("greenObstacleChance")) || 0.15;
+            document.getElementById("greenObstacleChance").value = greenObstacleChance;
+
+            greenObstacleAmmo = parseInt(localStorage.getItem("greenObstacleAmmo")) || 20;
+            document.getElementById("greenObstacleAmmo").value = greenObstacleAmmo;
+
+            bulletSpeed = parseFloat(localStorage.getItem("bulletSpeed")) || 10;
+            document.getElementById("bulletSpeed").value = bulletSpeed;
+
+            ammo = parseInt(localStorage.getItem("maxAmmo")) || 50;
+            document.getElementById("maxAmmo").value = ammo;
+
+            const musicVolume = parseFloat(localStorage.getItem("musicVolume")) || 100;
+            backgroundMusic.volume = musicVolume / 100;
+            document.getElementById("musicVolume").value = musicVolume;
+
+            const sfxVolume = parseFloat(localStorage.getItem("sfxVolume")) || 100;
+            jumpSound.volume = sfxVolume / 100;
+            shootSound.volume = sfxVolume / 100;
+            explodeSound.volume = sfxVolume / 100;
+            greenObstacleSound.volume = sfxVolume / 100;
+            gameOverSound.volume = sfxVolume / 100;
+            hoverSound.volume = sfxVolume / 100;
+            localStorage.setItem("sfxVolume", sfxVolume);
+            document.getElementById("sfxVolume").value = sfxVolume;
+        }
+
+        // دالة لتحميل الصور
+        function loadImage(src, callback) {
+            const image = new Image();
+            const isGif = src.endsWith(".gif");
+            image.onload = () => {
+                imagesLoaded++;
+                console.log(`Image loaded: ${src}`);
+                callback(image, isGif);
+                checkLoadingStatus();
+            };
+            image.onerror = () => {
+                console.error(`Error loading image: ${src}`);
+                imagesLoaded++;
+                checkLoadingStatus();
+            };
+            image.src = src;
+        }
+        
+        function checkLoadingStatus() {
+            if (imagesLoaded >= totalImages) {
+                console.log("All images loaded. Enabling start button.");
+                startBtn.disabled = false;
+                startBtn.innerText = "🚀 ابدأ اللعب";
+            }
+        }
+
+        // تحميل الصور الأساسية عند بدء التطبيق
+        loadImage('assets/images/player.png', (img, isGif) => {
+            player.image = img;
+            player.isGif = isGif;
+        });
+        loadImage('assets/images/red_obstacle.png', (img) => redObstacleImage = img);
+        loadImage('assets/images/green_obstacle.png', (img) => greenObstacleImage = img);
+        loadImage('assets/images/bullet.png', (img) => bulletImage = img);
+
+        // إضافة مستمع لحدث تغيير الصورة
+        document.getElementById("playerImageInput").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    loadImage(event.target.result, (img, isGif) => {
+                        player.image = img;
+                        player.isGif = isGif;
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("redObstacleImageInput").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    loadImage(event.target.result, (img) => redObstacleImage = img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("greenObstacleImageInput").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    loadImage(event.target.result, (img) => greenObstacleImage = img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("bulletImageInput").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    loadImage(event.target.result, (img) => bulletImage = img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById("playerName").addEventListener("input", (e) => {
+            localStorage.setItem("playerName", e.target.value);
+            playerName = e.target.value;
+        });
+
+        document.getElementById("playerSpeed").addEventListener("input", (e) => {
+            localStorage.setItem("playerSpeed", e.target.value);
+            player.speed = parseFloat(e.target.value);
+        });
+
+        document.getElementById("maxJumps").addEventListener("input", (e) => {
+            localStorage.setItem("maxJumps", e.target.value);
+            player.maxJumps = parseInt(e.target.value);
+        });
+
+        document.getElementById("jumpPower").addEventListener("input", (e) => {
+            localStorage.setItem("jumpPower", e.target.value);
+            player.jumpPower = parseFloat(e.target.value);
+        });
+
+        document.getElementById("gravity").addEventListener("input", (e) => {
+            localStorage.setItem("gravity", e.target.value);
+            player.gravity = parseFloat(e.target.value);
+        });
+
+        document.getElementById("lives").addEventListener("input", (e) => {
+            localStorage.setItem("lives", e.target.value);
+            lives = parseInt(e.target.value);
+        });
+
+        document.getElementById("rotationSpeed").addEventListener("input", (e) => {
+            localStorage.setItem("rotationSpeed", e.target.value);
+            rotationSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById("obstacleBounce").addEventListener("input", (e) => {
+            localStorage.setItem("obstacleBounce", e.target.value);
+            obstacleBounce = parseFloat(e.target.value);
+        });
+
+        document.getElementById("maxObstacles").addEventListener("input", (e) => {
+            localStorage.setItem("maxObstacles", e.target.value);
+            maxObstacles = parseInt(e.target.value);
+        });
+
+        document.getElementById("greenObstacleChance").addEventListener("input", (e) => {
+            localStorage.setItem("greenObstacleChance", e.target.value);
+            greenObstacleChance = parseFloat(e.target.value);
+        });
+
+        document.getElementById("greenObstacleAmmo").addEventListener("input", (e) => {
+            localStorage.setItem("greenObstacleAmmo", e.target.value);
+            greenObstacleAmmo = parseInt(e.target.value);
+        });
+
+        document.getElementById("bulletSpeed").addEventListener("input", (e) => {
+            localStorage.setItem("bulletSpeed", e.target.value);
+            bulletSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById("maxAmmo").addEventListener("input", (e) => {
+            localStorage.setItem("maxAmmo", e.target.value);
+            ammo = parseInt(e.target.value);
+        });
+
+        document.getElementById("musicVolume").addEventListener("input", (e) => {
+            const volume = e.target.value / 100;
+            backgroundMusic.volume = volume;
+            localStorage.setItem("musicVolume", e.target.value);
+        });
+
+        document.getElementById("sfxVolume").addEventListener("input", (e) => {
+            const volume = e.target.value / 100;
+            jumpSound.volume = volume;
+            shootSound.volume = volume;
+            explodeSound.volume = volume;
+            greenObstacleSound.volume = volume;
+            gameOverSound.volume = volume;
+            hoverSound.volume = volume;
+            localStorage.setItem("sfxVolume", e.target.value);
+        });
+
+        document.getElementById("resetBtn").addEventListener("click", () => {
+            localStorage.clear();
+            location.reload();
+        });
+
+        function shootBullet(mouseX, mouseY) {
+            if (ammo > 0) {
+                const angle = Math.atan2(mouseY - (player.y + player.height / 2), mouseX - (player.x + player.width / 2));
+                bullets.push({
+                    x: player.x + player.width / 2,
+                    y: player.y + player.height / 2,
+                    dx: Math.cos(angle) * bulletSpeed,
+                    dy: Math.sin(angle) * bulletSpeed,
+                    radius: 5,
+                    image: bulletImage
+                });
+                ammo--;
+                if (isSfxOn) {
+                    shootSound.currentTime = 0;
+                    shootSound.play().catch(e => console.error("Error playing shoot sound:", e));
+                }
+            }
+        }
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.dx = (Math.random() - 0.5) * 5;
+                this.dy = (Math.random() - 0.5) * 5;
+                this.size = Math.random() * 5 + 2;
+                this.color = color;
+                this.alpha = 1;
+                this.friction = 0.98;
+            }
+
+            update() {
+                this.dx *= this.friction;
+                this.dy *= this.friction;
+                this.x += this.dx;
+                this.y += this.dy;
+                this.alpha -= 0.03;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 30; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            // Player movement
+            if (keys["ArrowRight"] || keys["d"]) player.x += player.speed;
+            if (keys["ArrowLeft"] || keys["a"]) player.x -= player.speed;
+            if ((keys["ArrowUp"] || keys["w"] || keys[" "]) && player.jumps < player.maxJumps) {
+                player.dy = -player.jumpPower;
+                player.jumps++;
+                keys["ArrowUp"] = keys["w"] = keys[" "] = false;
+                if (isSfxOn) {
+                    jumpSound.currentTime = 0;
+                    jumpSound.play().catch(e => console.error("Error playing jump sound:", e));
+                }
+            }
+
+            player.dy += player.gravity;
+            player.y += player.dy;
+
+            // Ground collision
+            if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+                player.dy = 0;
+                player.jumps = 0;
+            }
+
+            // Screen boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Update bullets
+            bullets.forEach((bullet, index) => {
+                bullet.x += bullet.dx;
+                bullet.y += bullet.dy;
+                if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+                    bullets.splice(index, 1);
+                }
+            });
+
+            // Update obstacles
+            if (obstacles.length < maxObstacles) {
+                const isGreen = Math.random() < greenObstacleChance;
+                
+                // ✅ --- بداية التعديل --- ✅
+                const spawnFromRight = Math.random() < 0.5;
+                const obstacleWidth = 50;
+                const obstacleHeight = 50;
+                let spawnX;
+                let obstacleSpeed = Math.random() * 3 + 2; // سرعة أساسية موجبة
+
+                if (spawnFromRight) {
+                    spawnX = canvas.width;
+                    obstacleSpeed = -obstacleSpeed; // سرعة سالبة للحركة نحو اليسار
+                } else {
+                    spawnX = 0 - obstacleWidth; // الظهور من خارج الشاشة يساراً
+                    // تبقى السرعة موجبة للحركة نحو اليمين
+                }
+
+                // تحديد المكان في الربع السفلي من الشاشة
+                const spawnY = (canvas.height * 0.75) + Math.random() * (canvas.height * 0.25 - obstacleHeight);
+
+                obstacles.push({
+                    x: spawnX,
+                    y: spawnY,
+                    width: obstacleWidth,
+                    height: obstacleHeight,
+                    speed: obstacleSpeed, // السرعة الآن تحمل الاتجاه (+ أو -)
+                    dy: 0,
+                    angle: 0,
+                    isGreen: isGreen,
+                    image: isGreen ? greenObstacleImage : redObstacleImage
+                });
+                // ✅ --- نهاية التعديل --- ✅
+            }
+
+            obstacles.forEach((obstacle, index) => {
+                obstacle.x += obstacle.speed; // ✅ تعديل: يتم استخدام الجمع لأن السرعة تحمل الاتجاه
+                obstacle.angle += rotationSpeed;
+
+                // لا يوجد ارتداد رأسي في هذه الحالة، يمكن إزالة هذا الجزء لو أردت
+                if (obstacle.y + obstacle.height > canvas.height) {
+                    obstacle.dy = -obstacleBounce;
+                } else {
+                    obstacle.dy += player.gravity;
+                }
+                obstacle.y += obstacle.dy;
+
+                // Collision with player
+                if (
+                    player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y
+                ) {
+                    if (obstacle.isGreen) {
+                        ammo += greenObstacleAmmo;
+                        score += 5;
+                        obstacles.splice(index, 1);
+                        if (isSfxOn) {
+                            greenObstacleSound.currentTime = 0;
+                            greenObstacleSound.play().catch(e => console.error("Error playing green obstacle sound:", e));
+                        }
+                    } else {
+                        // Collision with red obstacle
+                        createExplosion(obstacle.x, obstacle.y, "red");
+                        obstacles.splice(index, 1);
+                        lives--; 
+                        if (isSfxOn) {
+                            explodeSound.currentTime = 0;
+                            explodeSound.play().catch(e => console.error("Error playing explode sound:", e));
+                        }
+                    }
+                }
+                
+                // ✅ تعديل: تحديث شرط الخروج من الشاشة
+                if ((obstacle.speed < 0 && obstacle.x + obstacle.width < 0) || // يتحرك يساراً وخرج من الشاشة
+                    (obstacle.speed > 0 && obstacle.x > canvas.width)) {      // يتحرك يميناً وخرج من الشاشة
+                    obstacles.splice(index, 1);
+                    if (!obstacle.isGreen) {
+                        score++;
+                    }
+                }
+            });
+
+            // Bullet-obstacle collision
+            bullets.forEach((bullet, bIndex) => {
+                obstacles.forEach((obstacle, oIndex) => {
+                    if (
+                        bullet.x > obstacle.x &&
+                        bullet.x < obstacle.x + obstacle.width &&
+                        bullet.y > obstacle.y &&
+                        bullet.y < obstacle.y + obstacle.height
+                    ) {
+                        createExplosion(obstacle.x, obstacle.y, obstacle.isGreen ? "green" : "red");
+                        bullets.splice(bIndex, 1);
+                        obstacles.splice(oIndex, 1);
+                        score += obstacle.isGreen ? 5 : 2;
+                        if (isSfxOn) {
+                            explodeSound.currentTime = 0;
+                            explodeSound.play().catch(e => console.error("Error playing explode sound:", e));
+                        }
+                    }
+                });
+            });
+
+            // Update particles
+            particles.forEach((p, index) => {
+                p.update();
+                if (p.alpha <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+
+            if (lives <= 0 && !gameOver) {
+                endGame();
+            }
+
+            updateHud();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw player
+            if (player.image) {
+                ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
+            } else {
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+
+            // Draw bullets
+            bullets.forEach(bullet => {
+                if (bullet.image) {
+                    ctx.drawImage(bullet.image, bullet.x - bullet.radius, bullet.y - bullet.radius, bullet.radius * 2, bullet.radius * 2);
+                } else {
+                    ctx.fillStyle = "yellow";
+                    ctx.beginPath();
+                    ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Draw obstacles
+            obstacles.forEach(obstacle => {
+                ctx.save();
+                ctx.translate(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2);
+                ctx.rotate(obstacle.angle);
+                if (obstacle.image) {
+                    ctx.drawImage(obstacle.image, -obstacle.width / 2, -obstacle.height / 2, obstacle.width, obstacle.height);
+                } else {
+                    ctx.fillStyle = obstacle.isGreen ? "lime" : "red";
+                    ctx.fillRect(-obstacle.width / 2, -obstacle.height / 2, obstacle.width, obstacle.height);
+                }
+                ctx.restore();
+            });
+
+            // Draw particles
+            particles.forEach(p => p.draw());
+        }
+
+        function updateHud() {
+            elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById("scoreDisplay").innerText = score;
+            document.getElementById("livesDisplay").innerText = lives;
+            document.getElementById("timeDisplay").innerText = `${elapsedTime}s`;
+            document.getElementById("ammoDisplay").innerText = ammo;
+        }
+
+        function gameLoop() {
+            if (gameOver) return;
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            loadSettings(); // تحميل الإعدادات عند بدء اللعبة
+            document.getElementById("mainMenuScreen").classList.add("hidden");
+            document.getElementById("gameCanvas").classList.remove("hidden");
+            document.getElementById("gameHud").classList.remove("hidden");
+            gameRunning = true;
+            startTime = Date.now();
+            player.y = canvas.height - 200;
+
+            if (isMusicOn) {
+                backgroundMusic.play().catch(e => console.error("Error playing background music:", e));
+            }
+            gameLoop();
+        }
+
+        function endGame() {
+            gameOver = true;
+            gameRunning = false;
+            document.getElementById("gameOverScreen").classList.remove("hidden");
+            document.getElementById("finalScore").innerText = `النقاط: ${score}`;
+            document.getElementById("finalTime").innerText = `الوقت: ${elapsedTime}s`;
+            document.getElementById("playerNameDisplay").innerText = playerName;
+            saveScore(playerName, score, elapsedTime);
+
+            if (isMusicOn) {
+                backgroundMusic.pause();
+            }
+            if (isSfxOn) {
+                gameOverSound.play().catch(e => console.error("Error playing game over sound:", e));
+            }
+        }
+
+        function saveScore(name, score, time) {
+            const scores = JSON.parse(localStorage.getItem("leaderboard")) || [];
+            scores.push({ name, score, time });
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem("leaderboard", JSON.stringify(scores.slice(0, 10)));
+        }
+
+        function showLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem("leaderboard")) || [];
+            const leaderboardBody = document.getElementById("leaderboardBody");
+            leaderboardBody.innerHTML = "";
+            scores.forEach(s => {
+                const row = `
+                    <tr style="border-bottom: 1px solid #555;">
+                        <td style="padding: 10px;">${s.name}</td>
+                        <td style="padding: 10px;">${s.score}</td>
+                        <td style="padding: 10px;">${s.time}s</td>
+                    </tr>
+                `;
+                leaderboardBody.innerHTML += row;
+            });
+            showScreen('leaderboardScreen');
+        }
+
+        startBtn.addEventListener("click", startGame);
+
+        window.onload = loadSettings;
+    </script>
+</body>
+</html>
